@@ -83,12 +83,13 @@ class ModelEvaluator:
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
 
-        # Load base model on CPU (AMD ROCm compatibility workaround)
+        # Load base model on GPU
         print(f"Loading base model: {base_model_name}")
         self.model = AutoModelForCausalLM.from_pretrained(
             base_model_name,
-            torch_dtype=torch.float32,
+            torch_dtype=torch.float16,
             trust_remote_code=True,
+            device_map="auto"
         )
 
         # Resize embeddings if internal token model

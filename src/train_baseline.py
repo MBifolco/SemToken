@@ -90,12 +90,13 @@ def main(
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Use CPU for training (AMD ROCm has kernel compatibility issues with RX 6650 XT)
-    print("Using CPU for training (AMD GPU kernel issues workaround)")
+    # Load model on GPU with fp16
+    print("Loading model on GPU...")
     model = AutoModelForCausalLM.from_pretrained(
         config.model_name,
-        torch_dtype=torch.float32,
+        torch_dtype=torch.float16,
         trust_remote_code=True,
+        device_map="auto"
     )
 
     # Enable gradient checkpointing
@@ -144,7 +145,7 @@ def main(
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
         greater_is_better=False,
-        fp16=False,  # Disabled for AMD ROCm compatibility
+        fp16=True,
         report_to="none",
         dataloader_pin_memory=False,
     )

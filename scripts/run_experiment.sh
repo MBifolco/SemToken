@@ -5,8 +5,8 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-# Use CPU for training (AMD ROCm kernel issues workaround)
-export CUDA_VISIBLE_DEVICES=""
+# AMD ROCm workaround: use gfx1030 kernels for gfx1032 (RX 6650 XT)
+export HSA_OVERRIDE_GFX_VERSION=10.3.0
 export TOKENIZERS_PARALLELISM=false
 
 echo "=============================================="
