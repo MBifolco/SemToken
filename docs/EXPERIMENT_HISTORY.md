@@ -517,21 +517,58 @@ For each layer ℓ (0-24 in Qwen2.5-0.5B):
 | Representational depth | Decision accessible earlier in network | ✅ Proven (Phase 10) |
 | Cognitive/computational efficiency | Fewer FLOPs, faster forward pass | ❌ Not proven (requires early-exit or compositional reuse) |
 
+### Early-Exit Simulation (A1)
+
+Given the layerwise results, we computed the "potential compute saved" by analyzing at which layer the model's decision is already good enough.
+
+**This is a SIMULATION** - no actual early-exit is implemented. It shows the ceiling for potential savings.
+
+#### Results: AUC vs Exit Layer
+
+| Layer | Depth % | Token AUC | Token AUC % of Final | Baseline AUC |
+|-------|---------|-----------|---------------------|--------------|
+| 15 | 62% | 0.898 | 91.8% | 0.504 |
+| 16 | 67% | **0.945** | 96.6% | 0.507 |
+| 17 | 71% | **0.959** | 98.0% | 0.811 |
+| 21 | 88% | 0.971 | 99.2% | 0.783 |
+| 24 | 100% | 0.979 | 100% | 0.812 |
+
+#### Threshold Analysis
+
+| Threshold | Baseline Layer | Token Layer | Token Depth % | Potential Savings |
+|-----------|----------------|-------------|---------------|-------------------|
+| AUC ≥ 0.90 | never | 16 | 67% | **33%** |
+| AUC ≥ 0.95 | never | 17 | 71% | **29%** |
+| AUC ≥ 0.98 | never | never | N/A | N/A |
+
+#### Key Headline
+
+> **Token model reaches AUC≥0.95 at layer 17/24 (71% depth) → potential to skip 29% of layers**
+>
+> **Baseline NEVER reaches AUC≥0.95 at any layer (peaks at 0.88)**
+
+This means:
+- With an early-exit mechanism, the token model could stop at layer 17 and still achieve 98% of final separability
+- The baseline cannot achieve equivalent performance at any depth
+- The token creates a "readable" decision axis that crystallizes earlier AND reaches a higher ceiling
+
 ### Next Steps Identified
 
 To prove actual computational efficiency, one of these experiments would be needed:
 
-1. **Early-exit implementation**: Exit at layer 17 when confidence exceeds threshold
+1. **Early-exit implementation**: Actually stop at layer 17 (requires architectural changes)
 2. **Compositional reuse**: Feed token back into context for downstream reasoning
-3. **Training from scratch**: Pretrain with semantic tokens (not fine-tune)
+3. **Ablations**: Verify the improvement is specifically due to the token objective
 
 These are identified as future work, not claims of the current project.
 
 ### Files Added
 
 ```
-src/layerwise_probe.py    # Logit lens analysis implementation
-layerwise_results.json    # Full results with per-layer margins
+src/layerwise_probe.py        # Logit lens analysis implementation
+src/early_exit_simulation.py  # A1: Early-exit potential analysis
+layerwise_results.json        # Full results with per-layer margins
+early_exit_results.json       # Early-exit simulation results
 ```
 
 ---
