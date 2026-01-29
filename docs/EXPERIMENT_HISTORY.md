@@ -280,6 +280,7 @@ ollm/
 │   ├── exp3a_rewrite_generator.py # Exp 3A: Scenario rewriter
 │   ├── exp3a_evaluate.py         # Exp 3A: Evaluate on rewrites
 │   ├── eval_triad.py             # Phase 9: Triad evaluation
+│   ├── layerwise_probe.py        # Phase 10: Logit lens analysis
 │   └── utils.py                  # Formatting and parsing utilities
 ├── models/
 │   ├── baseline_track1/          # Trained baseline adapter
@@ -293,6 +294,7 @@ ollm/
 │       └── token_M_seed{0,1,2}/
 ├── run_triad_simple.sh           # Triad training script
 ├── triad_results.json            # Phase 9: Full evaluation results
+├── layerwise_results.json        # Phase 10: Logit lens results
 └── docs/
     └── EXPERIMENT_HISTORY.md     # This document
 ```
@@ -444,6 +446,92 @@ models/triad/     # All 18 trained models
 src/eval_triad.py # Triad evaluation script
 run_triad_simple.sh # Training script
 triad_results.json  # Full results
+```
+
+---
+
+## Phase 10: Layerwise Representational Depth Analysis (Complete)
+
+### Motivation
+
+After establishing interface efficiency (fewer tokens) and learning efficiency (robustness), the question arose: does the token model require "less internal work"?
+
+ChatGPT correctly identified that our experiments so far proved **interface efficiency**, not **cognitive efficiency**. To bridge this gap, we implemented a layerwise "logit lens" analysis to measure where the decision becomes accessible in the network.
+
+### Important Framing
+
+This analysis measures **representational depth** - at what layer does the decision become linearly accessible?
+
+It does **NOT** prove:
+- Fewer FLOPs
+- Faster forward passes
+- "Less thinking"
+
+It **does** show whether the decision crystallizes into a readable form earlier in the network.
+
+### Method: Logit Lens
+
+For each layer ℓ (0-24 in Qwen2.5-0.5B):
+
+1. Extract hidden states at the decision position
+2. Apply final layer norm + lm_head to get "early logits"
+3. Compute decision margin:
+   - **Token model**: P(⟦LOVE_ROM⟧) - P(⟦LOVE_NONROM⟧)
+   - **Baseline**: sequence logprob("romantic") - sequence logprob("non-romantic")
+4. Compute AUC across test set at each layer
+
+### Results
+
+| Layer | Baseline AUC | Token AUC | Δ AUC |
+|-------|--------------|-----------|-------|
+| 0 | 0.50 | 0.50 | 0.00 |
+| 5 | 0.64 | 0.70 | +0.06 |
+| 10 | 0.23 | 0.32 | +0.09 |
+| 15 | 0.50 | **0.90** | +0.40 |
+| 16 | 0.51 | **0.95** | +0.44 |
+| 17 | 0.81 | 0.96 | +0.15 |
+| 22 | 0.88 | 0.97 | +0.09 |
+| 24 | 0.81 | **0.98** | +0.17 |
+
+**Key finding:**
+- Token model reaches AUC ≥ 0.95 at **layer 17** (of 24)
+- Baseline **never** reaches AUC ≥ 0.95 (peaks at 0.88)
+
+### Interpretation
+
+1. **Decision crystallizes earlier for token model**: The decision becomes "readable" 7 layers before the final output.
+
+2. **Token creates cleaner representational axis**: The semantic token provides a direct mapping from internal state to decision, while the baseline's multi-token output is harder to decode from intermediate layers.
+
+3. **Necessary but not sufficient for computational efficiency**: If early-exit were implemented, the token model *could* exit at layer 17. But without early-exit, no FLOPs are saved.
+
+4. **Baseline's multi-token output is inherently harder to probe**: Comparing sequence logprobs across layers is more complex than single-token probing, which may partially explain the gap.
+
+### Updated Claims Hierarchy
+
+| Level | Claim | Status |
+|-------|-------|--------|
+| Interface efficiency | Fewer tokens to externalize decision | ✅ Proven |
+| Learning efficiency | Robustness under distribution shift | ✅ Proven |
+| Representational alignment | Token aligns to stable internal axis | ✅ Proven |
+| Representational depth | Decision accessible earlier in network | ✅ Proven (Phase 10) |
+| Cognitive/computational efficiency | Fewer FLOPs, faster forward pass | ❌ Not proven (requires early-exit or compositional reuse) |
+
+### Next Steps Identified
+
+To prove actual computational efficiency, one of these experiments would be needed:
+
+1. **Early-exit implementation**: Exit at layer 17 when confidence exceeds threshold
+2. **Compositional reuse**: Feed token back into context for downstream reasoning
+3. **Training from scratch**: Pretrain with semantic tokens (not fine-tune)
+
+These are identified as future work, not claims of the current project.
+
+### Files Added
+
+```
+src/layerwise_probe.py    # Logit lens analysis implementation
+layerwise_results.json    # Full results with per-layer margins
 ```
 
 ---
