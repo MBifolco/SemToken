@@ -669,7 +669,114 @@ ablation_results.json     # Evaluation results
 
 ---
 
+## Reframing: From "Semantic Tokens" to "Discrete Decision Channels"
+
+### The Revised Abstract Concept
+
+Based on the ablation results, what we built is less "internal semantic language" and more:
+
+**A learned discrete decision interface (a tiny symbolic bottleneck) that makes a model commit.**
+
+The token strings don't matter. What matters is that we created:
+
+- A **small set of mutually exclusive symbols**
+- That the model is trained to emit at a **known decision point**
+- Which forces the representation to become **linearly separable and robust**
+- And makes decoding cheap because output entropy collapses
+
+This is the generalizable idea: **discrete latent variables for transformers, learned via supervision**, implemented as extra vocab tokens.
+
+In ML archetypes: it's "mixture-of-experts routing, but pushed into the output channel", or "a VQ bottleneck, but as a language action".
+
+### Why This Matters
+
+The ablation experiments (Phase 11) confirmed this reframing:
+
+1. **Random tokens work** → The semantic content is irrelevant
+2. **Symmetric design required** → You need mutually exclusive symbols
+3. **Task structure matters** → The decision point forces commitment
+
+The tokens act as a **discrete bottleneck** that forces the model to compress its decision into a categorical variable before proceeding. This is what creates the robustness and early crystallization observed in earlier phases.
+
+### Naming the Thing
+
+Better names for this mechanism:
+
+- **Discrete Decision Channels (DDCs)**
+- **Decision-token bottlenecks**
+- **Symbolic routing interfaces**
+
+These names avoid the misleading implication that token meanings matter.
+
+---
+
+## Future Directions
+
+Based on the experiment findings, several promising directions emerge:
+
+### 1. K-way Scaling (Supervised)
+
+Replace binary {ROM, NONROM} with K-way classification:
+- Simple extension: one token per class
+- Known failure mode: as K grows, codes become "messy" without structure
+- Solution: factorization (multiple binary axes vs one flat K)
+
+### 2. Factorized/Hierarchical Tokens
+
+Instead of flat K-way tokens, use compositional structure:
+- `⟦AXIS1_...⟧ ⟦AXIS2_...⟧` rather than one huge flat K
+- Example: `⟦STYLE_FORMAL⟧ ⟦SENTIMENT_WARM⟧`
+- Hierarchical: coarse cluster → refined token → attributes
+
+**Hypothesis**: Factorized tokens should scale better than flat tokens.
+
+### 3. Unsupervised Discovery
+
+Can the model discover the discrete interface without explicit labels?
+
+Approaches:
+- Self-supervised discrete latents (predict continuation after choosing z)
+- Routing priors (pick max K, encourage sparsity)
+- Weak supervision / pseudo-labeling
+
+Success metric: Does adding discrete decision tokens improve next-token prediction under constraints that force the tokens to matter?
+
+### 4. Concrete Next Experiment: K-way Extension
+
+A clean stepping stone:
+- Create a 4-way task with overlapping cues (or two independent binary factors = 2×2)
+- Train three variants:
+  1. Flat K tokens (one-of-4)
+  2. Factorized tokens (two binary tokens)
+  3. Baseline text labels
+- Measure: robustness to rewrites, layerwise crystallization, calibration, utilization
+
+This tests whether the "decision interface" scales better as flat clustering or factorized axes.
+
+---
+
+## Summary of All Phases
+
+| Phase | Focus | Key Finding |
+|-------|-------|-------------|
+| 1-4 | Initial MVP & debugging | Label masking critical, format simplification needed |
+| 5 | Track 1 redesign | Symmetric tokens + holdout testing |
+| 6 | Seed sensitivity | Token model stable, baseline unstable under shift |
+| 7 | Track 2 design | Efficiency experiment ready |
+| 8 | Style leakage (Exp 3A) | Token degrades less than baseline under rewrites |
+| 9 | Retrain triad | Mixed training + token = best performance |
+| 10 | Layerwise probing | Decision crystallizes earlier for token model |
+| 11 | Ablations (E2) | **Random tokens work** → it's about task structure, not semantics |
+
+**Final interpretation**: The benefit comes from **discrete decision channels** - forcing the model to commit to a categorical variable at a known point, regardless of what that variable "means."
+
+---
+
 ## References
+
+- Base model: Qwen/Qwen2.5-0.5B-Instruct
+- Fine-tuning: LoRA (r=8, alpha=16)
+- Hardware: AMD GPU with ROCm (HSA_OVERRIDE_GFX_VERSION=10.3.0)
 
 - Base model: Qwen/Qwen2.5-0.5B-Instruct
 - Fine-tuning: LoRA (r=8, alpha=16)
