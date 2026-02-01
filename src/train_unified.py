@@ -140,6 +140,34 @@ def init_token_random(model, tokenizer, token: str, init_lm_head: bool = True):
     print(f"  {token} (id={token_id}): random init (std={existing_std:.4f}), lm_head={init_lm_head}")
 
 
+def init_token_interpolated(model, tokenizer, token: str, init_words: list[str],
+                            alpha: float, init_lm_head: bool = True):
+    """
+    Initialize token embedding as interpolation between semantic and random.
+
+    alpha=0.0 -> pure random
+    alpha=1.0 -> pure semantic
+    alpha=0.5 -> 50% semantic + 50% random
+    """
+    token_id = tokenizer.convert_tokens_to_ids(token)
+    semantic_emb = get_mean_embedding(model, tokenizer, init_words)
+
+    with torch.no_grad():
+        existing_std = model.model.embed_tokens.weight[:-2].std().item()
+        random_emb = torch.randn_like(model.model.embed_tokens.weight[token_id]) * existing_std
+
+        # Interpolate: alpha * semantic + (1-alpha) * random
+        interpolated_emb = alpha * semantic_emb + (1 - alpha) * random_emb
+        model.model.embed_tokens.weight[token_id] = interpolated_emb
+
+        if init_lm_head and hasattr(model, 'lm_head'):
+            random_lm = torch.randn_like(model.lm_head.weight[token_id]) * existing_std
+            interpolated_lm = alpha * semantic_emb + (1 - alpha) * random_lm
+            model.lm_head.weight[token_id] = interpolated_lm
+
+    print(f"  {token} (id={token_id}): interpolated init (α={alpha:.2f}), lm_head={init_lm_head}")
+
+
 # =============================================================================
 # Prompt formatting functions
 # =============================================================================
@@ -269,7 +297,8 @@ def prepare_datasets(train_path: str, val_path: str, tokenizer, max_length: int,
 def train(
     channel: str,  # dedicated, rn_vocab, single
     token_string: str = "semantic",  # semantic, random (for dedicated channel)
-    init_type: str = "semantic",  # semantic, random
+    init_type: str = "semantic",  # semantic, random, interpolated
+    init_alpha: Optional[float] = None,  # for interpolated init: 0.0=random, 1.0=semantic
     init_lm_head: bool = True,
     train_set: str = "M",  # O, R, M
     output_dir: str = "models/unified",
@@ -285,7 +314,8 @@ def train(
             - rn_vocab: existing vocab tokens (R/N)
             - single: single token (presence/absence)
         token_string: For dedicated channel, which token strings to use
-        init_type: How to initialize new token embeddings
+        init_type: How to initialize new token embeddings (semantic, random, interpolated)
+        init_alpha: For interpolated init, alpha value (0.0=random, 1.0=semantic)
         init_lm_head: Whether to also initialize lm_head rows
         train_set: Which training data (O=original, R=rewritten, M=mixed)
         output_dir: Where to save the model
@@ -376,6 +406,9 @@ def train(
         if init_type == "semantic":
             init_token_semantic(model, tokenizer, rom_token, ROM_INIT_WORDS, init_lm_head)
             init_token_semantic(model, tokenizer, nonrom_token, NONROM_INIT_WORDS, init_lm_head)
+        elif init_type == "interpolated" and init_alpha is not None:
+            init_token_interpolated(model, tokenizer, rom_token, ROM_INIT_WORDS, init_alpha, init_lm_head)
+            init_token_interpolated(model, tokenizer, nonrom_token, NONROM_INIT_WORDS, init_alpha, init_lm_head)
         else:
             init_token_random(model, tokenizer, rom_token, init_lm_head)
             init_token_random(model, tokenizer, nonrom_token, init_lm_head)
@@ -384,6 +417,8 @@ def train(
         print("\nInitializing single token:")
         if init_type == "semantic":
             init_token_semantic(model, tokenizer, SEMANTIC_NONROM, NONROM_INIT_WORDS, init_lm_head)
+        elif init_type == "interpolated" and init_alpha is not None:
+            init_token_interpolated(model, tokenizer, SEMANTIC_NONROM, NONROM_INIT_WORDS, init_alpha, init_lm_head)
         else:
             init_token_random(model, tokenizer, SEMANTIC_NONROM, init_lm_head)
 
@@ -456,6 +491,7 @@ def train(
         "channel": channel,
         "token_string": token_string,
         "init_type": init_type,
+        "init_alpha": init_alpha,
         "init_lm_head": init_lm_head,
         "train_set": train_set,
         "seed": seed,
@@ -486,8 +522,10 @@ def main():
                        choices=["semantic", "random"],
                        help="Token strings to use (for dedicated channel)")
     parser.add_argument("--init", type=str, default="semantic",
-                       choices=["semantic", "random"],
+                       choices=["semantic", "random", "interpolated"],
                        help="Initialization type for new tokens")
+    parser.add_argument("--init_alpha", type=float, default=None,
+                       help="For interpolated init: 0.0=random, 1.0=semantic")
     parser.add_argument("--init_lm_head", type=int, default=1,
                        help="Whether to initialize lm_head rows (0 or 1)")
 
@@ -508,12 +546,17 @@ def main():
     # Auto-generate output directory if not specified
     if args.output_dir is None:
         if args.channel == "dedicated":
-            name = f"{args.token_string}_{args.init}init"
-            if args.token_string != args.init:
-                name += "_swap"
+            if args.init == "interpolated" and args.init_alpha is not None:
+                # Format alpha for directory name (e.g., 0.25 -> alpha025)
+                alpha_str = f"alpha{int(args.init_alpha * 100):03d}"
+                name = f"{args.token_string}_{alpha_str}"
+            else:
+                name = f"{args.token_string}_{args.init}init"
+                if args.token_string != args.init:
+                    name += "_swap"
         else:
             name = args.channel
-        args.output_dir = f"models/unified/{name}_train{args.train_set}_seed{args.seed}"
+        args.output_dir = f"models/unified/{name}_seed{args.seed}"
 
     os.makedirs(os.path.dirname(args.output_dir), exist_ok=True)
 
@@ -521,6 +564,7 @@ def main():
         channel=args.channel,
         token_string=args.token_string,
         init_type=args.init,
+        init_alpha=args.init_alpha,
         init_lm_head=bool(args.init_lm_head),
         train_set=args.train_set,
         output_dir=args.output_dir,
