@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "model_path": "models/unified/semantic_seed42",
+    "test_data_path": "data/test_rewritten.jsonl",
+    "n_examples": 230,
+    "n_layers": 24,
+    "exit_layers": [
+      11,
+      14,
+      15,
+      16,
+      17,
+      18,
+      20,
+      23
+    ]
+  },
+  "per_layer": {
+    "11": {
+      "accuracy": 0.47391304347826085,
+      "auc": 0.6906892107058914,
+      "mean_latency_ms": 24.095417211588096,
+      "p50_latency_ms": 24.298530692855515,
+      "p95_latency_ms": 24.917384710473318,
+      "mean_confidence": 0.8656568568685781,
+      "depth_pct": 50.0,
+      "layers_used": 12,
+      "layers_skipped": 12
+    },
+    "14": {
+      "accuracy": 0.5347826086956522,
+      "auc": 0.9606869360830995,
+      "mean_latency_ms": 29.04949091320885,
+      "p50_latency_ms": 29.27587002826234,
+      "p95_latency_ms": 30.023137914637722,
+      "mean_confidence": 0.7598896145820617,
+      "depth_pct": 62.5,
+      "layers_used": 15,
+      "layers_skipped": 9
+    },
+    "15": {
+      "accuracy": 0.7695652173913043,
+      "auc": 0.9697475168701191,
+      "mean_latency_ms": 30.714802485148333,
+      "p50_latency_ms": 30.997566025083266,
+      "p95_latency_ms": 31.701844736623265,
+      "mean_confidence": 0.7640104472637177,
+      "depth_pct": 66.66666666666666,
+      "layers_used": 16,
+      "layers_skipped": 8
+    },
+    "16": {
+      "accuracy": 0.8956521739130435,
+      "auc": 0.9808931685495489,
+      "mean_latency_ms": 32.29686378541848,
+      "p50_latency_ms": 32.66174377252658,
+      "p95_latency_ms": 33.2608199523141,
+      "mean_confidence": 0.8313679964646049,
+      "depth_pct": 70.83333333333334,
+      "layers_used": 17,
+      "layers_skipped": 7
+    },
+    "17": {
+      "accuracy": 0.9130434782608695,
+      "auc": 0.9803624232314808,
+      "mean_latency_ms": 34.01501178606481,
+      "p50_latency_ms": 34.30209564976394,
+      "p95_latency_ms": 35.07739913960298,
+      "mean_confidence": 0.8356170641339343,
+      "depth_pct": 75.0,
+      "layers_used": 18,
+      "layers_skipped": 6
+    },
+    "18": {
+      "accuracy": 0.908695652173913,
+      "auc": 0.9797937675335507,
+      "mean_latency_ms": 35.67083826072623,
+      "p50_latency_ms": 36.051099421456456,
+      "p95_latency_ms": 36.65545647187779,
+      "mean_confidence": 0.8791967747004136,
+      "depth_pct": 79.16666666666666,
+      "layers_used": 19,
+      "layers_skipped": 5
+    },
+    "20": {
+      "accuracy": 0.908695652173913,
+      "auc": 0.9815376450072031,
+      "mean_latency_ms": 38.94998292722132,
+      "p50_latency_ms": 39.383105390394725,
+      "p95_latency_ms": 40.042335842736065,
+      "mean_confidence": 0.9301778850348099,
+      "depth_pct": 87.5,
+      "layers_used": 21,
+      "layers_skipped": 3
+    },
+    "23": {
+      "accuracy": 0.8869565217391304,
+      "auc": 0.9799454090529987,
+      "mean_latency_ms": 43.94619392730511,
+      "p50_latency_ms": 44.467984000220895,
+      "p95_latency_ms": 45.14330010085056,
+      "mean_confidence": 0.9342109260351762,
+      "depth_pct": 100.0,
+      "layers_used": 24,
+      "layers_skipped": 0
+    }
+  },
+  "full_forward": {
+    "accuracy": 0.8869565217391304,
+    "auc": 0.9799454090529987,
+    "mean_latency_ms": 43.96969693564418,
+    "p50_latency_ms": 44.448404805734754,
+    "p95_latency_ms": 45.191034115850925
+  }
+}
