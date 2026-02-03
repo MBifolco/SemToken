@@ -119,13 +119,15 @@ K2_LOVE_CONFIG = TaskConfig(
     },
     vocab_tokens_flat={
         # Best worst-case maxp from selection runs (E/O pair)
+        #['E', 'O'] | worst entropy 0.5856 | worst maxp 0.7136 | mean entropy 0.6310 | mean maxp 0.6395
         "romantic": "E",
         "non-romantic": "O",
     },
     vocab_tokens_peaky={
         # High prior bias tokens (stress test)
-        "romantic": "M",
-        "non-romantic": "Q",
+        #['T', 'Z'] | worst entropy 0.0167 | worst maxp 0.9976 | mean entropy 0.3451 | mean maxp 0.8077
+        "romantic": "T",
+        "non-romantic": "Z",
     },
     dedicated_tokens={
         "romantic": "⟦BASE_R⟧",
@@ -152,16 +154,18 @@ K4_SUPPORT_CONFIG = TaskConfig(
     },
     vocab_tokens_flat={
         # Relatively flat 4-way set from selection (ACRY)
+        #['A', 'C', 'R', 'Y'] | worst entropy 1.2511 | worst maxp 0.4192 | mean entropy 1.2806 | mean maxp 0.3994
         "emotional": "A",
         "practical": "C",
         "ideological": "R",
         "structural": "Y",
     },
     vocab_tokens_peaky={
-        # High prior bias tokens (stress test)
-        "emotional": "R",
-        "practical": "W",
-        "ideological": "X",
+        # High prior bias tokens (stress test) 
+        #['S', 'U', 'V', 'Z'] | worst entropy 0.4101 | worst maxp 0.8974 | mean entropy 0.6909 | mean maxp 0.7669
+        "emotional": "S",
+        "practical": "U",
+        "ideological": "V",
         "structural": "Z",
     },
     dedicated_tokens={
