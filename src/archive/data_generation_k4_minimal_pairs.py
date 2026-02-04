@@ -31,7 +31,7 @@ import anthropic
 load_dotenv()
 
 # Initialize client
-api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_KEY") or os.getenv("ANTHROPIC_KEY_KEY")
+api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
 client = anthropic.Anthropic(api_key=api_key)
 
 CATEGORIES = ["E", "P", "I", "S"]

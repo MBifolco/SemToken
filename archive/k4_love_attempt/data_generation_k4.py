@@ -31,7 +31,7 @@ import threading
 # Load .env from project root
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_KEY"))
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY"))
 
 # K=4 Categories
 CATEGORIES = ["ROM", "FAM", "PLA", "OBJ"]

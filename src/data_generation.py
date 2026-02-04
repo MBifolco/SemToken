@@ -25,7 +25,7 @@ import threading
 # Load .env from project root
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_KEY_KEY"))
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY"))
 
 # Forbidden terms that reveal relationship type
 FORBIDDEN_TERMS = [

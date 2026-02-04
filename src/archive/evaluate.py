@@ -167,7 +167,7 @@ class FaithfulnessJudge:
     """Uses Anthropic to judge if explanation matches label."""
 
     def __init__(self):
-        self.client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_KEY_KEY"))
+        self.client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY"))
 
     def judge(self, explanation: str, stated_label: str) -> dict:
         """Judge if the explanation implies the stated label."""
@@ -208,7 +208,7 @@ class ParaphraseGenerator:
     """Generates paraphrases of scenarios for robustness testing."""
 
     def __init__(self):
-        self.client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_KEY_KEY"))
+        self.client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY"))
 
     def generate_paraphrase(self, scenario: str) -> str | None:
         """Generate a paraphrase that preserves meaning."""
