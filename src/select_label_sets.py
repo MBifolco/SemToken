@@ -5,6 +5,31 @@ Select flat vs peaky label token sets under a controlled zero-shot probe.
 Examples:
   python src/select_label_sets.py --k 4 --n_candidates 200 --template answer --space_mode space
   python src/select_label_sets.py --k 2 --exhaustive --template decision --template_text "DECISION: {opts}"
+
+  python src/select_label_sets.py \
+  --k 4 \
+  --pool_types letters,numbers \
+  --n_candidates 200 \
+  --template custom \
+  --template_text "Valid tokens: {opts}\nDECISION:" \
+  --prompt_prefix "Classify the type of support in this scenario:\n\n{scenario}\n\n" \
+  --space_mode both \
+  --include_reverse \
+  --out_json results/label_set_selection_k4.json \
+  --data data/k4_support/train.jsonl
+
+  python src/select_label_sets.py \
+  --k 2 \
+  --pool_types letters,numbers,symbols \
+  --n_candidates 300 \
+  --template custom \
+  --template_text "Valid tokens: {opts}\nDECISION:" \
+  --prompt_prefix "Classify the type of love in this scenario:\n\n{scenario}\n\n" \
+  --space_mode both \
+  --include_reverse \
+  --out_json results/label_set_selection_k2.json \
+  --data data/k2_love/M/train.jsonl
+
 """
 from __future__ import annotations
 
