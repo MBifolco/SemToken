@@ -75,7 +75,6 @@ from kn import (
     verify_single_token,
     init_token_interpolated,
     log_embedding_geometry,
-    make_compute_metrics,
     probe_decision_priors,
     load_jsonl,
 )
@@ -415,22 +414,22 @@ def train(
         fp16=True,
         report_to="none",
         save_total_limit=config.save_total_limit,
+        # Skip logits accumulation during eval to avoid OOM
+        # (vocab_size × seq_len × batch_size is huge)
+        # We'll use eval_kn.py for proper evaluation after training
+        prediction_loss_only=True,
     )
 
     # Data collator
     data_collator = DataCollatorForSeq2Seq(tokenizer, pad_to_multiple_of=8)
 
-    # Create compute_metrics function
-    compute_metrics = make_compute_metrics(token_info, task_config)
-
-    # Trainer
+    # Trainer (no compute_metrics since prediction_loss_only=True)
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
         data_collator=data_collator,
-        compute_metrics=compute_metrics,
     )
 
     # Train
