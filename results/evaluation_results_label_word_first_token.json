@@ -1,0 +1,252 @@
+{
+  "experiment": "label_word_first_token variant evaluation",
+  "description": "Evaluation of label_word_first_token variant: predicts full label words (romantic/nonromantic for K2, emotional/practical/ideological/structural for K4) with supervision only on first BPE token",
+  "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "n_layers": 24,
+  "timestamp": "2026-02-05",
+  "summary": {
+    "k2_love": {
+      "task": "Binary classification of 'love' meaning (romantic vs non-romantic)",
+      "n_test": 460,
+      "first_tokens": {
+        "romantic": {"token": "rom", "token_id": 441},
+        "non-romantic": {"token": "non", "token_id": 6280}
+      },
+      "results": {
+        "seed_42": {"accuracy": 0.926, "auc": 0.987, "crystallization_layer_auc95": 17},
+        "seed_123": {"accuracy": 0.928, "auc": 0.986, "crystallization_layer_auc95": 17},
+        "seed_456": {"accuracy": 0.891, "auc": 0.960, "crystallization_layer_auc95": 17}
+      },
+      "mean_accuracy": 0.915,
+      "mean_auc": 0.978,
+      "consistent_crystallization_layer": 17
+    },
+    "k4_support": {
+      "task": "4-way classification of 'support' meaning (emotional/practical/ideological/structural)",
+      "n_test": 120,
+      "first_tokens": {
+        "emotional": {"token": "em", "token_id": 336},
+        "practical": {"token": "pr", "token_id": 649},
+        "ideological": {"token": "ide", "token_id": 577},
+        "structural": {"token": "structural", "token_id": 95697}
+      },
+      "results": {
+        "seed_42": {"accuracy": 0.967, "macro_auc": 0.998, "crystallization_layer_auc95": 21},
+        "seed_123": {"accuracy": 0.975, "macro_auc": 0.9997, "crystallization_layer_auc95": 21},
+        "seed_456": {"accuracy": 0.958, "macro_auc": 0.998, "crystallization_layer_auc95": 21}
+      },
+      "mean_accuracy": 0.967,
+      "mean_macro_auc": 0.998,
+      "consistent_crystallization_layer": 21
+    }
+  },
+  "detailed_results": {
+    "k2_love_seed42": {
+      "model_path": "models/k2_love/label_word_ft_seed42",
+      "test_data_path": "data/k2_love/M/test.jsonl",
+      "n_test": 460,
+      "basic": {
+        "accuracy": 0.9260869565217391,
+        "auc": 0.9864944271741604,
+        "per_class_accuracy": {
+          "romantic": 0.8760330578512396,
+          "non-romantic": 0.981651376146789
+        },
+        "confusion_matrix": [[212, 30], [4, 214]]
+      },
+      "layerwise": {
+        "final_accuracy": 0.908695652173913,
+        "final_auc": 0.9866271135036774,
+        "crystallization": {
+          "auc_0.90": 17,
+          "auc_0.95": 17,
+          "auc_0.98": 21,
+          "accuracy_0.90": 21
+        },
+        "layer_auc": {
+          "0": 0.5, "1": 0.601, "2": 0.508, "3": 0.635, "4": 0.504, "5": 0.635,
+          "6": 0.675, "7": 0.717, "8": 0.577, "9": 0.415, "10": 0.508, "11": 0.478,
+          "12": 0.325, "13": 0.510, "14": 0.422, "15": 0.654, "16": 0.863, "17": 0.976,
+          "18": 0.976, "19": 0.971, "20": 0.976, "21": 0.983, "22": 0.985, "23": 0.986, "24": 0.987
+        }
+      }
+    },
+    "k2_love_seed123": {
+      "model_path": "models/k2_love/label_word_ft_seed123",
+      "test_data_path": "data/k2_love/M/test.jsonl",
+      "n_test": 460,
+      "basic": {
+        "accuracy": 0.9282608695652174,
+        "auc": 0.9863617408446433,
+        "per_class_accuracy": {
+          "romantic": 0.9504132231404959,
+          "non-romantic": 0.9036697247706422
+        },
+        "confusion_matrix": [[230, 12], [21, 197]]
+      },
+      "layerwise": {
+        "final_accuracy": 0.9282608695652174,
+        "final_auc": 0.9863522632496777,
+        "crystallization": {
+          "auc_0.90": 16,
+          "auc_0.95": 17,
+          "auc_0.98": 21,
+          "accuracy_0.90": 20
+        },
+        "layer_auc": {
+          "0": 0.5, "1": 0.592, "2": 0.497, "3": 0.614, "4": 0.500, "5": 0.629,
+          "6": 0.669, "7": 0.704, "8": 0.537, "9": 0.430, "10": 0.432, "11": 0.438,
+          "12": 0.365, "13": 0.523, "14": 0.423, "15": 0.540, "16": 0.921, "17": 0.976,
+          "18": 0.974, "19": 0.969, "20": 0.973, "21": 0.982, "22": 0.984, "23": 0.986, "24": 0.986
+        }
+      }
+    },
+    "k2_love_seed456": {
+      "model_path": "models/k2_love/label_word_ft_seed456",
+      "test_data_path": "data/k2_love/M/test.jsonl",
+      "n_test": 460,
+      "basic": {
+        "accuracy": 0.8913043478260869,
+        "auc": 0.960487906588824,
+        "per_class_accuracy": {
+          "romantic": 0.9049586776859504,
+          "non-romantic": 0.8761467889908257
+        },
+        "confusion_matrix": [[219, 23], [27, 191]]
+      },
+      "layerwise": {
+        "final_accuracy": 0.8956521739130435,
+        "final_auc": 0.9600045492455834,
+        "crystallization": {
+          "auc_0.90": 16,
+          "auc_0.95": 17,
+          "auc_0.98": null,
+          "accuracy_0.90": null
+        },
+        "layer_auc": {
+          "0": 0.5, "1": 0.594, "2": 0.504, "3": 0.639, "4": 0.516, "5": 0.638,
+          "6": 0.681, "7": 0.689, "8": 0.566, "9": 0.436, "10": 0.493, "11": 0.533,
+          "12": 0.327, "13": 0.494, "14": 0.429, "15": 0.590, "16": 0.906, "17": 0.957,
+          "18": 0.959, "19": 0.956, "20": 0.956, "21": 0.960, "22": 0.962, "23": 0.962, "24": 0.960
+        }
+      }
+    },
+    "k4_support_seed42": {
+      "model_path": "models/k4_support/label_word_ft_seed42",
+      "test_data_path": "data/k4_support/test.jsonl",
+      "n_test": 120,
+      "basic": {
+        "accuracy": 0.9666666666666667,
+        "macro_auc": 0.9978703703703704,
+        "per_class_accuracy": {
+          "emotional": 0.9666666666666667,
+          "practical": 0.9666666666666667,
+          "ideological": 0.9333333333333333,
+          "structural": 1.0
+        },
+        "per_class_auc": {
+          "emotional": 1.0,
+          "practical": 0.9955555555555555,
+          "ideological": 0.9988888888888889,
+          "structural": 0.997037037037037
+        },
+        "confusion_matrix": [[29,1,0,0], [0,29,0,1], [0,2,28,0], [0,0,0,30]]
+      },
+      "layerwise": {
+        "final_accuracy": 0.9666666666666667,
+        "final_auc": 0.9976851851851852,
+        "crystallization": {
+          "auc_0.90": 18,
+          "auc_0.95": 21,
+          "auc_0.98": 21,
+          "accuracy_0.90": 23,
+          "accuracy_0.95": 23
+        },
+        "layer_macro_auc": {
+          "0": 0.500, "1": 0.553, "2": 0.559, "3": 0.565, "4": 0.477, "5": 0.481,
+          "6": 0.489, "7": 0.480, "8": 0.481, "9": 0.506, "10": 0.539, "11": 0.539,
+          "12": 0.616, "13": 0.598, "14": 0.553, "15": 0.657, "16": 0.686, "17": 0.845,
+          "18": 0.904, "19": 0.907, "20": 0.880, "21": 0.986, "22": 0.991, "23": 0.997, "24": 0.998
+        }
+      }
+    },
+    "k4_support_seed123": {
+      "model_path": "models/k4_support/label_word_ft_seed123",
+      "test_data_path": "data/k4_support/test.jsonl",
+      "n_test": 120,
+      "basic": {
+        "accuracy": 0.975,
+        "macro_auc": 0.9997222222222222,
+        "per_class_accuracy": {
+          "emotional": 0.9666666666666667,
+          "practical": 0.9666666666666667,
+          "ideological": 1.0,
+          "structural": 0.9666666666666667
+        },
+        "per_class_auc": {
+          "emotional": 0.9996296296296296,
+          "practical": 0.9996296296296296,
+          "ideological": 1.0,
+          "structural": 0.9996296296296296
+        },
+        "confusion_matrix": [[29,0,1,0], [0,29,0,1], [0,0,30,0], [0,1,0,29]]
+      },
+      "layerwise": {
+        "final_accuracy": 0.975,
+        "final_auc": 0.9996296296296296,
+        "crystallization": {
+          "auc_0.90": 19,
+          "auc_0.95": 21,
+          "auc_0.98": 21,
+          "accuracy_0.90": 22,
+          "accuracy_0.95": 23
+        },
+        "layer_macro_auc": {
+          "0": 0.500, "1": 0.550, "2": 0.558, "3": 0.552, "4": 0.471, "5": 0.477,
+          "6": 0.481, "7": 0.461, "8": 0.482, "9": 0.496, "10": 0.507, "11": 0.517,
+          "12": 0.602, "13": 0.597, "14": 0.587, "15": 0.596, "16": 0.548, "17": 0.837,
+          "18": 0.840, "19": 0.926, "20": 0.906, "21": 0.991, "22": 0.997, "23": 0.9996, "24": 0.9996
+        }
+      }
+    },
+    "k4_support_seed456": {
+      "model_path": "models/k4_support/label_word_ft_seed456",
+      "test_data_path": "data/k4_support/test.jsonl",
+      "n_test": 120,
+      "basic": {
+        "accuracy": 0.9583333333333334,
+        "macro_auc": 0.9983333333333333,
+        "per_class_accuracy": {
+          "emotional": 0.9333333333333333,
+          "practical": 0.9666666666666667,
+          "ideological": 0.9666666666666667,
+          "structural": 0.9666666666666667
+        },
+        "per_class_auc": {
+          "emotional": 0.9996296296296296,
+          "practical": 0.9977777777777778,
+          "ideological": 0.9966666666666667,
+          "structural": 0.9992592592592593
+        },
+        "confusion_matrix": [[28,0,2,0], [0,29,0,1], [0,1,29,0], [0,1,0,29]]
+      },
+      "layerwise": {
+        "final_accuracy": 0.95,
+        "final_auc": 0.9985185185185186,
+        "crystallization": {
+          "auc_0.90": 21,
+          "auc_0.95": 21,
+          "auc_0.98": 21,
+          "accuracy_0.90": 23,
+          "accuracy_0.95": 23
+        },
+        "layer_macro_auc": {
+          "0": 0.500, "1": 0.547, "2": 0.548, "3": 0.572, "4": 0.474, "5": 0.489,
+          "6": 0.493, "7": 0.468, "8": 0.494, "9": 0.501, "10": 0.526, "11": 0.546,
+          "12": 0.618, "13": 0.574, "14": 0.622, "15": 0.575, "16": 0.592, "17": 0.840,
+          "18": 0.852, "19": 0.871, "20": 0.872, "21": 0.981, "22": 0.995, "23": 0.999, "24": 0.999
+        }
+      }
+    }
+  }
+}
